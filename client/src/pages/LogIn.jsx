@@ -1,13 +1,31 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash, FaHome } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const handleLogin = () => {};
+  const handleLogIn = async (e) => {
+    e.preventDefault();
+    const response = await fetch("http://localhost:8080/api/v1/auth/log-in", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ usernameOrEmail, password }),
+    });
+    const responseData = await response.json();
+    if (responseData.token) {
+      localStorage.setItem("token", responseData.token);
+      //responseData.user is the token
+      navigate("/");
+    } else {
+      alert("Invalid Credientals");
+    }
+  };
 
   return (
     <div className="bg-gradient-to-r from-green-600 to-blue-600 min-h-screen flex flex-col items-center justify-center">
@@ -27,14 +45,14 @@ const Login = () => {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Email
+              Username or Email
             </label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              id="usernameOrEmail"
+              name="usernameOrEmail"
+              value={usernameOrEmail}
+              onChange={(e) => setUsernameOrEmail(e.target.value)}
               className="w-full px-3 py-2 border border-green-400 focus:outline-none focus:border-green-900 rounded"
               placeholder="Your email address"
               required
@@ -81,12 +99,12 @@ const Login = () => {
             type="button"
             className={`w-full text-white py-2 rounded-md
              transition duration-300 ${
-               email.length === 0 || password.length < 6
+               usernameOrEmail.length === 0 || password.length < 6
                  ? "bg-gray-500 hover:bg-gray-500"
                  : "bg-green-500 hover:bg-green-700"
              }`}
-            onClick={handleLogin}
-            disabled={email.length === 0 || password.length < 6}
+            onClick={handleLogIn}
+            disabled={usernameOrEmail.length === 0 || password.length < 6}
           >
             Log In
           </button>

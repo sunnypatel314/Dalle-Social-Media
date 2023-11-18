@@ -1,23 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { preview } from "../assets";
 import { getRandomPrompt } from "../utils";
 import FormField from "../components/FormField";
 import Loader from "../components/Loader";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { logo } from "../assets";
+import { FaHome, FaSignOutAlt } from "react-icons/fa";
 
 const CreatePost = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", prompt: "", photo: "" });
-
+  const [form, setForm] = useState({ prompt: "", photo: "" });
   const [generatingImg, setGeneratingImg] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
+  const logOut = () => {
+    if (localStorage.getItem("token")) {
+      localStorage.removeItem("token");
+    }
+    navigate("/log-in");
+  };
+
+  const goHome = () => {
+    navigate("/");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.prompt && form.photo) {
+    if (form.photo) {
       setLoading(true);
       setIsDisabled(true);
       try {
@@ -25,6 +35,7 @@ const CreatePost = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify(form),
         });
@@ -75,6 +86,14 @@ const CreatePost = () => {
     }
   };
 
+  useEffect(() => {
+    const getUser = async () => {
+      const token = localStorage.getItem("token") || null;
+      console.log(token);
+    };
+    getUser();
+  });
+
   return (
     <>
       <header
@@ -84,37 +103,39 @@ const CreatePost = () => {
         <Link to={"/"}>
           <img src={logo} alt="logo" className="w-28 object-contain" />
         </Link>
-
-        <Link
-          to={"/create-post"}
-          className="font-inter font-semibold bg-purple-500 text-white py-2 
-          px-4 rounded-md hover:cursor-pointer hover:bg-purple-700"
-        >
-          Create
-        </Link>
+        <div className="flex flex-row space-x-4">
+          <button
+            onClick={goHome}
+            className="font-inter flex items-center font-semibold bg-blue-500 text-white py-2 
+          px-4 rounded-md hover:cursor-pointer hover:bg-blue-700"
+          >
+            <span className="mr-2">Go Home</span> <FaHome />
+          </button>
+          <button
+            onClick={logOut}
+            className="font-inter flex items-center font-semibold bg-red-500 text-white py-2 
+            px-4 rounded-md hover:cursor-pointer hover:bg-red-700"
+          >
+            <span className="mr-2">Log Out</span> <FaSignOutAlt />
+          </button>
+        </div>
       </header>
       <main className="sm:p-8 px-4 py-8 w-full bg-[#f9fafe] min-h-[calc(100vh-73px)]">
         <section className="max-w-7xl mx-auto">
           <div>
-            <h1 className="font-extrabold text-[#222328] text-[32px]">
+            <h1 className="font-extrabold text-[#222328] text-[32px] text-center">
               Create Image
             </h1>
-            <p className="mt-2 text-[#666e75] text-[14px] max-w-[500px]">
+            <p className="mt-2 text-[#666e75] text-[14px] text-center w-full">
               Create imaginative and visually stunning images generated through
               DALLE-AI and share them with the community.
             </p>
           </div>
-
-          <form className="mt-16 max-w-3xl" onSubmit={handleSubmit}>
-            <div className="flex flex-col gap-5">
-              <FormField
-                labelName="Your Name"
-                type="text"
-                name="name"
-                placeholder="Tide Pods"
-                value={form.name}
-                handleChange={handleChange}
-              />
+          <form
+            className="mt-16 w-full flex flex-col items-center"
+            onSubmit={handleSubmit}
+          >
+            <div className="flex flex-col items-center justify-center gap-5">
               <FormField
                 labelName="Prompt"
                 type="text"
@@ -124,12 +145,13 @@ const CreatePost = () => {
                 handleChange={handleChange}
                 isSurpriseMe
                 handleSurpriseMe={handleSurpriseMe}
+                isDisabled={form.photo}
               />
               <div
                 className="relative bg-gray-50 border border-gray-300
-           text-gray-900 text-sm rounded-lg focus:ring-blue-500
-            focus:border-blue-500 w-64 p-3 h-64 flex justify-center 
-            items-center"
+            text-gray-900 text-sm rounded-lg focus:ring-blue-500
+              focus:border-blue-500 w-96 aspect-square p-3 flex justify-center 
+              items-center"
               >
                 {form.photo ? (
                   <img
@@ -151,7 +173,7 @@ const CreatePost = () => {
                 )}
               </div>
             </div>
-            <div className="mt-5 w-full flex gap-5">
+            <div className="mt-5 w-full flex items-center justify-center gap-5">
               <button
                 type="button"
                 disabled={isDisabled}
@@ -161,7 +183,7 @@ const CreatePost = () => {
                 {generatingImg ? "Generating..." : "Generate"}
               </button>
             </div>
-            <div className="mt-10">
+            <div className="mt-10 flex flex-col items-center justify-center">
               <p className="mt-2 text-[#666e75] text-[14px]">
                 ** Once you have created the image you want, you can share it
                 with others in the community **

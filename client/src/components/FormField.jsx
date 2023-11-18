@@ -9,6 +9,7 @@ const FormField = ({
   handleChange,
   isSurpriseMe,
   handleSurpriseMe,
+  isDisabled,
 }) => {
   return (
     <div>
@@ -34,7 +35,8 @@ const FormField = ({
         type={type}
         id={name}
         name={name}
-        className="bg-gray-50 border border-gray-300 text-gray-900 
+        disabled={isDisabled}
+        className="bg-gray-50 border border-gray-600 text-gray-900 
         text-sm rounded-lg focus:ring-[#6469ff] focus:border-[#6469ff] 
         outline-none block w-full p-3"
         placeholder={placeholder}

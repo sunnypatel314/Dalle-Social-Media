@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash, FaHome } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignUp = () => {
+  const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,15 +18,37 @@ const SignUp = () => {
     email.substring(email.indexOf("@"), email.length - 1).length <= 0 ||
     password.length < 6;
 
-  const handleSignUp = () => {
-    console.log(email);
-    console.log(password);
-  };
-
   function hasSpecialCharacters(userString) {
     const regex = /[^a-zA-Z0-9]/;
     return regex.test(userString);
   }
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/v1/auth/sign-up",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, email, password }),
+        }
+      );
+      const responseData = await response.json();
+      if (responseData.success) {
+        alert(
+          "Your account has been created! Click OK to go to the Login screen"
+        );
+        navigate("/log-in");
+      } else {
+        alert(responseData.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="bg-gradient-to-r from-blue-600 to-green-600 min-h-screen flex items-center justify-center">
@@ -204,9 +227,8 @@ const SignUp = () => {
             />
           </div>
           <button
-            type="submit"
-            disabled={isButtonDisabled}
             onClick={handleSignUp}
+            disabled={isButtonDisabled}
             className={`w-full ${
               isButtonDisabled ? "bg-gray-500" : "bg-blue-500 hover:bg-blue-700"
             } text-white py-2 rounded-md transition duration-300`}
