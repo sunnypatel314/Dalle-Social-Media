@@ -12,7 +12,7 @@ const FormField = ({
   isDisabled,
 }) => {
   return (
-    <div>
+    <div className="w-full">
       <div className="flex items-center gap-2 mb-2">
         <label
           htmlFor={name}

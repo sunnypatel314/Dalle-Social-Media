@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash, FaHome } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import Loader from "../components/Loader";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setisLoading] = useState(false);
 
   let isButtonDisabled =
     username.length < 4 ||
@@ -25,6 +27,7 @@ const SignUp = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+    setisLoading(true);
     try {
       const response = await fetch(
         "http://localhost:8080/api/v1/auth/sign-up",
@@ -38,15 +41,19 @@ const SignUp = () => {
       );
       const responseData = await response.json();
       if (responseData.success) {
+        setisLoading(false);
         alert(
           "Your account has been created! Click OK to go to the Login screen"
         );
         navigate("/log-in");
       } else {
         alert(responseData.message);
+        setisLoading(false);
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setisLoading(false);
     }
   };
 
@@ -60,185 +67,199 @@ const SignUp = () => {
           <FaHome />
         </Link>
         <h2 className="text-2xl font-semibold mb-4 text-blue-700 text-center">
-          Sign Up
-        </h2>
-        <form>
-          <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email
-            </label>
-            {(!email.includes("@") ||
-              email.substring(email.indexOf("@"), email.length - 1).length ===
-                0) &&
-            email.length > 0 ? (
-              <p className={`text-xs text-red-500`}>
-                Must be in proper email format
-              </p>
-            ) : null}
-            <input
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-              value={email}
-              type="email"
-              id="email"
-              name="email"
-              className={`w-full px-3 py-2 border border-blue-400 rounded focus:outline-none focus:border-blue-900 ${
-                (!email.includes("@") ||
-                  email.substring(email.indexOf("@"), email.length - 1)
-                    .length === 0) &&
-                email.length > 0
-                  ? "border-red-700"
-                  : ""
-              }`}
-              placeholder="Your email address"
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Username
-            </label>
-            {username.length < 4 && username.length != 0 ? (
-              <p className={`text-xs text-red-500`}>
-                Username must be atleast 4 characters
-              </p>
-            ) : null}
-            {hasSpecialCharacters(username) ? (
-              <p className={`text-xs text-red-500`}>
-                Username cannot have any special characters
-              </p>
-            ) : null}
-            <input
-              onChange={(e) => {
-                setUsername(e.target.value);
-              }}
-              value={username}
-              type="text"
-              id="username"
-              name="username"
-              className={`w-full px-3 py-2 border border-blue-400 rounded focus:outline-none focus:border-blue-900 ${
-                (username.length < 4 || hasSpecialCharacters(username)) &&
-                username.length != 0
-                  ? "border-red-700"
-                  : ""
-              }`}
-              placeholder="Your username"
-            />
-          </div>
-          <div className="mb-4">
-            <div className="flex justify-between">
+          {isLoading ? "Creating your account..." : "Sign Up"}
+        </h2>{" "}
+        {!isLoading ? (
+          <form>
+            <div className="mb-4">
               <label
-                htmlFor="password"
-                className={`block text-sm font-medium text-gray-700`}
-              >
-                Password
-              </label>
-              <div className="hover:cursor-pointer">
-                {passwordVisible ? (
-                  <FaEyeSlash
-                    onClick={() => {
-                      setPasswordVisible(!passwordVisible);
-                    }}
-                  />
-                ) : (
-                  <FaEye
-                    onClick={() => {
-                      setPasswordVisible(!passwordVisible);
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-            {!hasSpecialCharacters(password) && password.length > 0 ? (
-              <p className={`text-xs text-red-500`}>
-                Must include a special character
-              </p>
-            ) : null}
-            {password.length < 6 && password.length > 0 ? (
-              <p className={`text-xs text-red-500`}>
-                Must be at least 6 characters
-              </p>
-            ) : null}
-
-            <input
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-              value={password}
-              type={passwordVisible ? "text" : "password"}
-              id="password"
-              name="password"
-              className={`w-full px-3 py-2 border border-blue-400 rounded focus:outline-none focus:border-blue-900 ${
-                (!hasSpecialCharacters(password) || password.length < 6) &&
-                password.length > 0
-                  ? "border-red-700"
-                  : ""
-              }`}
-              placeholder="Your password"
-            />
-          </div>
-          <div className="mb-4">
-            <div className="flex justify-between">
-              <label
-                htmlFor="password"
+                htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Confirm Password
+                Email
               </label>
-              <div className="hover:cursor-pointer">
-                {passwordVisible ? (
-                  <FaEyeSlash
-                    onClick={() => {
-                      setPasswordVisible(!passwordVisible);
-                    }}
-                  />
-                ) : (
-                  <FaEye
-                    onClick={() => {
-                      setPasswordVisible(!passwordVisible);
-                    }}
-                  />
-                )}
-              </div>
+              {(!email.includes("@") ||
+                email.substring(email.indexOf("@"), email.length - 1).length ===
+                  0) &&
+              email.length > 0 ? (
+                <p className={`text-xs text-red-500`}>
+                  Must be in proper email format
+                </p>
+              ) : null}
+              <input
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+                value={email}
+                type="email"
+                id="email"
+                name="email"
+                className={`w-full px-3 py-2 border border-blue-400 rounded focus:outline-none focus:border-blue-900 ${
+                  (!email.includes("@") ||
+                    email.substring(email.indexOf("@"), email.length - 1)
+                      .length === 0) &&
+                  email.length > 0
+                    ? "border-red-700"
+                    : ""
+                }`}
+                placeholder="Your email address"
+              />
             </div>
-            {password !== confirmPassword && confirmPassword.length > 0 ? (
-              <p className={`text-xs text-red-500`}>Must match your password</p>
-            ) : null}
-            <input
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-              }}
-              value={confirmPassword}
-              type={passwordVisible ? "text" : "password"}
-              id="confirmPassword"
-              name="password"
-              className={`w-full px-3 py-2 border border-blue-400 rounded focus:outline-none focus:border-blue-900 ${
-                password !== confirmPassword && confirmPassword.length > 0
-                  ? "border-red-700"
-                  : ""
-              }`}
-              placeholder="Confirm your password"
-            />
+
+            <div className="mb-4">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Username
+              </label>
+              {username.length < 4 && username.length != 0 ? (
+                <p className={`text-xs text-red-500`}>
+                  Username must be atleast 4 characters
+                </p>
+              ) : null}
+              {hasSpecialCharacters(username) ? (
+                <p className={`text-xs text-red-500`}>
+                  Username cannot have any special characters
+                </p>
+              ) : null}
+              <input
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
+                value={username}
+                type="text"
+                id="username"
+                name="username"
+                className={`w-full px-3 py-2 border border-blue-400 rounded focus:outline-none focus:border-blue-900 ${
+                  (username.length < 4 || hasSpecialCharacters(username)) &&
+                  username.length != 0
+                    ? "border-red-700"
+                    : ""
+                }`}
+                placeholder="Your username"
+              />
+            </div>
+            <div className="mb-4">
+              <div className="flex justify-between">
+                <label
+                  htmlFor="password"
+                  className={`block text-sm font-medium text-gray-700`}
+                >
+                  Password
+                </label>
+                <div className="hover:cursor-pointer">
+                  {passwordVisible ? (
+                    <FaEyeSlash
+                      onClick={() => {
+                        setPasswordVisible(!passwordVisible);
+                      }}
+                    />
+                  ) : (
+                    <FaEye
+                      onClick={() => {
+                        setPasswordVisible(!passwordVisible);
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+              {!hasSpecialCharacters(password) && password.length > 0 ? (
+                <p className={`text-xs text-red-500`}>
+                  Must include a special character
+                </p>
+              ) : null}
+              {password.length < 6 && password.length > 0 ? (
+                <p className={`text-xs text-red-500`}>
+                  Must be at least 6 characters
+                </p>
+              ) : null}
+
+              <input
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+                value={password}
+                type={passwordVisible ? "text" : "password"}
+                id="password"
+                name="password"
+                className={`w-full px-3 py-2 border border-blue-400 rounded focus:outline-none focus:border-blue-900 ${
+                  (!hasSpecialCharacters(password) || password.length < 6) &&
+                  password.length > 0
+                    ? "border-red-700"
+                    : ""
+                }`}
+                placeholder="Your password"
+              />
+            </div>
+            <div className="mb-4">
+              <div className="flex justify-between">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Confirm Password
+                </label>
+                <div className="hover:cursor-pointer">
+                  {passwordVisible ? (
+                    <FaEyeSlash
+                      onClick={() => {
+                        setPasswordVisible(!passwordVisible);
+                      }}
+                    />
+                  ) : (
+                    <FaEye
+                      onClick={() => {
+                        setPasswordVisible(!passwordVisible);
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+              {password !== confirmPassword && confirmPassword.length > 0 ? (
+                <p className={`text-xs text-red-500`}>
+                  Must match your password
+                </p>
+              ) : null}
+              <input
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                }}
+                value={confirmPassword}
+                type={passwordVisible ? "text" : "password"}
+                id="confirmPassword"
+                name="password"
+                className={`w-full px-3 py-2 border border-blue-400 rounded focus:outline-none focus:border-blue-900 ${
+                  password !== confirmPassword && confirmPassword.length > 0
+                    ? "border-red-700"
+                    : ""
+                }`}
+                placeholder="Confirm your password"
+              />
+            </div>
+            <button
+              onClick={handleSignUp}
+              disabled={isButtonDisabled}
+              className={`w-full ${
+                isButtonDisabled
+                  ? "bg-gray-500"
+                  : "bg-blue-500 hover:bg-blue-700"
+              } text-white py-2 rounded-md transition duration-300`}
+            >
+              Sign Up
+            </button>
+          </form>
+        ) : (
+          <div className="flex items-center justify-center">
+            <Loader />
           </div>
-          <button
-            onClick={handleSignUp}
-            disabled={isButtonDisabled}
-            className={`w-full ${
-              isButtonDisabled ? "bg-gray-500" : "bg-blue-500 hover:bg-blue-700"
-            } text-white py-2 rounded-md transition duration-300`}
-          >
-            Sign Up
-          </button>
-        </form>
+        )}
         <p className="text-gray-700 text-sm mt-3 text-center">
           Already have an account?{"  "}
-          <Link to={"/log-in"} className="text-blue-600 hover:underline">
+          <Link
+            to={"/log-in"}
+            className="text-blue-600 font-semibold hover:underline"
+          >
             Log In
           </Link>
         </p>

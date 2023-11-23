@@ -33,7 +33,9 @@ function authToken(req, res, next) {
 router.route("/").get(authToken, async (req, res) => {
   try {
     const posts = await Post.find({});
-    res.status(200).json({ success: true, data: posts, user: req.user });
+    res
+      .status(200)
+      .json({ success: true, data: posts, user: req.user.username });
   } catch (error) {
     res.status(500).json({ success: false, message: error });
   }
@@ -44,14 +46,35 @@ router.route("/").post(authToken, async (req, res) => {
   try {
     const { prompt, photo } = req.body;
     const photoUrl = await cloudinary.uploader.upload(photo);
+    console.log(req.user.username);
     const newPost = await Post.create({
-      name: req.user.usernameOrEmail,
+      name: req.user.username,
       prompt,
       photo: photoUrl.url,
+      postId: Date.now(),
     });
     res.status(201).json({ success: true, data: newPost });
   } catch (error) {
     res.status(500).json({ success: false, message: error });
+  }
+});
+
+// DELETE A POST
+router.route("/:postId").delete(authToken, async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const post = await Post.findOne({ postId, name: req.user.username });
+    if (!post) {
+      console.log("deletion failed");
+      res.status(404).json({ error: "Item not found" });
+      return;
+    }
+    await Post.deleteOne({ postId, name: req.user.username });
+    console.log("deletion successful");
+    res.status(204).send();
+  } catch (error) {
+    console.log(error);
+    res.status(404).json({ error: "Item not found" });
   }
 });
 

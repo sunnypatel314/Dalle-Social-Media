@@ -16,7 +16,7 @@ router.route("/log-in").post(async (req, res) => {
   });
 
   if (user) {
-    const isMatch = bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (isMatch) {
       const token = jwt.sign(
         {
@@ -25,7 +25,11 @@ router.route("/log-in").post(async (req, res) => {
         },
         "secret123"
       );
-      return res.json({ status: "ok", token: token, user: user });
+      return res.json({ status: "ok", token: token, user: user.username });
+    } else {
+      return res
+        .status(401)
+        .json({ status: "failed", message: "Invalid credientals" });
     }
   } else {
     return res.json({ status: "error", user: false });

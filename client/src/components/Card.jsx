@@ -2,8 +2,41 @@ import React from "react";
 
 import { download } from "../assets";
 import { downloadImage } from "../utils";
+import { FaTrash } from "react-icons/fa";
 
-const Card = ({ _id, name, prompt, photo }) => {
+const Card = ({ _id, name, prompt, photo, postId, user, allPosts }) => {
+  const confirmDeletion = () => {
+    const confirmation = window.confirm(
+      "Are you sure you want to delete this post?"
+    );
+    if (confirmation) {
+      deletePost();
+    }
+  };
+  const deletePost = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v1/post/${postId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      console.log(response.status);
+      if (response.status == 204) {
+        console.log("Successfully deleted:");
+        window.location.reload();
+      } else {
+        alert("Something went wrong. Post was not deleted.");
+      }
+    } catch (error) {
+      console.error("Error during fetch:", error);
+    }
+  };
+
   return (
     <div className="rounded-xl group relative shadow-card hover:shadow-cardhover card">
       <img
@@ -21,17 +54,24 @@ const Card = ({ _id, name, prompt, photo }) => {
             </div>
             <p className="text-white text-sm">{name}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => downloadImage(_id, photo)}
-            className="outline-none bg-transparent border-none"
+          <div
+            className="outline-none bg-transparent border-none flex 
+            flex-row justify-center items-center space-x-3"
           >
-            <img
-              src={download}
-              alt="download"
-              className="w-6 h-6 object-contain invert"
-            />
-          </button>
+            <button type="button" onClick={() => downloadImage(_id, photo)}>
+              <img
+                src={download}
+                alt="download"
+                className="w-6 h-6 object-contain invert"
+              />
+            </button>
+            {user == name && (
+              <FaTrash
+                onClick={confirmDeletion}
+                className="w-6 h-6 text-white bg-transparent hover:text-red-500 hover:cursor-pointer"
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
