@@ -23,7 +23,7 @@ router.route("/log-in").post(async (req, res) => {
           username: user.username,
           password: user.password,
         },
-        "secret123"
+        process.env.ACCESS_TOKEN_SECRET
       );
       return res.json({ status: "ok", token: token, user: user.username });
     } else {

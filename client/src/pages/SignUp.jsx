@@ -13,16 +13,22 @@ const SignUp = () => {
   const [isLoading, setisLoading] = useState(false);
 
   let isButtonDisabled =
-    username.length < 4 ||
+    username.length < 3 ||
     hasSpecialCharacters(username) ||
-    password !== confirmPassword ||
+    username.includes(" ");
+  password !== confirmPassword ||
     !hasSpecialCharacters(password) ||
-    email.substring(email.indexOf("@"), email.length - 1).length <= 0 ||
+    email.substring(email.trim().indexOf("@"), email.length - 1).length <= 0 ||
+    email.includes(" ") ||
     password.length < 6;
 
   function hasSpecialCharacters(userString) {
     const regex = /[^a-zA-Z0-9]/;
     return regex.test(userString);
+  }
+  function isEmailValid(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   }
 
   const handleSignUp = async (e) => {
@@ -36,14 +42,18 @@ const SignUp = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ username, email, password }),
+          body: JSON.stringify({
+            username: username.trim(),
+            email: email.trim(),
+            password,
+          }),
         }
       );
       const responseData = await response.json();
       if (responseData.success) {
         setisLoading(false);
         alert(
-          "Your account has been created! Click OK to go to the Login screen"
+          "Your account has been created! Click OK to go to the Login screen."
         );
         navigate("/log-in");
       } else {
@@ -78,10 +88,7 @@ const SignUp = () => {
               >
                 Email
               </label>
-              {(!email.includes("@") ||
-                email.substring(email.indexOf("@"), email.length - 1).length ===
-                  0) &&
-              email.length > 0 ? (
+              {!isEmailValid(email) && email.length > 0 ? (
                 <p className={`text-xs text-red-500`}>
                   Must be in proper email format
                 </p>
@@ -113,14 +120,14 @@ const SignUp = () => {
               >
                 Username
               </label>
-              {username.length < 4 && username.length != 0 ? (
+              {username.length < 3 && username.length != 0 ? (
                 <p className={`text-xs text-red-500`}>
-                  Username must be atleast 4 characters
+                  Username must be atleast 3 characters
                 </p>
               ) : null}
               {hasSpecialCharacters(username) ? (
                 <p className={`text-xs text-red-500`}>
-                  Username cannot have any special characters
+                  Username cannot have any special characters or spaces
                 </p>
               ) : null}
               <input
@@ -169,9 +176,10 @@ const SignUp = () => {
                   Must include a special character
                 </p>
               ) : null}
-              {password.length < 6 && password.length > 0 ? (
+              {(password.length < 6 && password.length > 0) ||
+              password.includes(" ") ? (
                 <p className={`text-xs text-red-500`}>
-                  Must be at least 6 characters
+                  Must be at least 6 characters and none of them can be spaces
                 </p>
               ) : null}
 
@@ -254,15 +262,17 @@ const SignUp = () => {
             <Loader />
           </div>
         )}
-        <p className="text-gray-700 text-sm mt-3 text-center">
-          Already have an account?{"  "}
-          <Link
-            to={"/log-in"}
-            className="text-blue-600 font-semibold hover:underline"
-          >
-            Log In
-          </Link>
-        </p>
+        {!isLoading && (
+          <p className="text-gray-700 text-sm mt-3 text-center">
+            Already have an account?{"  "}
+            <Link
+              to={"/log-in"}
+              className="text-blue-600 font-semibold hover:underline"
+            >
+              Log In
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );

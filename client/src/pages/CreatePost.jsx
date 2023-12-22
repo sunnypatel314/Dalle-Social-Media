@@ -22,10 +22,6 @@ const CreatePost = () => {
     navigate("/log-in");
   };
 
-  const goHome = () => {
-    navigate("/");
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.photo) {
@@ -109,20 +105,20 @@ const CreatePost = () => {
         <div className="flex flex-row space-x-4">
           {isUser ? (
             <div className="flex flex-row space-x-4">
-              <button
-                onClick={logOut}
-                className="font-inter flex items-center font-semibold bg-red-500 text-white py-2 
-            px-4 rounded-md hover:cursor-pointer hover:bg-red-700"
-              >
-                <span className="mr-2">Log Out</span> <FaSignOutAlt />
-              </button>
               <Link
                 to={"/"}
                 className="font-inter flex items-center font-semibold bg-blue-500 text-white py-2 
-            px-4 rounded-md hover:cursor-pointer hover:bg-blue-700"
+            px-2 rounded-md hover:cursor-pointer hover:bg-blue-700"
               >
-                <span className="mr-2">Go Home</span> <FaHome />
+                <span className="mr-1">Home</span> <FaHome />
               </Link>
+              <button
+                onClick={logOut}
+                className="font-inter flex items-center font-semibold bg-red-500 text-white py-2 
+            px-2 rounded-md hover:cursor-pointer hover:bg-red-700"
+              >
+                <span className="mr-2">Log Out</span> <FaSignOutAlt />
+              </button>
             </div>
           ) : (
             <div className="flex flex-row space-x-4">
@@ -170,7 +166,7 @@ const CreatePost = () => {
                 handleChange={handleChange}
                 isSurpriseMe
                 handleSurpriseMe={handleSurpriseMe}
-                isDisabled={form.photo}
+                isDisabled={form.photo || generatingImg}
               />
               <div
                 className="relative bg-gray-50 border border-gray-300
@@ -201,13 +197,23 @@ const CreatePost = () => {
             <div className="mt-5 w-full flex items-center justify-center gap-5">
               <button
                 type="button"
-                disabled={isDisabled || !form.prompt}
-                onClick={generateImage}
+                disabled={isDisabled || (!form.prompt && isUser)}
+                onClick={() => {
+                  if (isUser) {
+                    generateImage();
+                  } else {
+                    navigate("/log-in");
+                  }
+                }}
                 className={`text-white ${
-                  form.prompt ? "bg-green-600" : "bg-gray-400"
+                  form.prompt || !isUser ? "bg-green-600" : "bg-gray-400"
                 }  font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center`}
               >
-                {generatingImg ? "Generating..." : "Generate"}
+                {generatingImg
+                  ? "Generating..."
+                  : !isUser
+                  ? "Log in to generate images"
+                  : "Generate"}
               </button>
             </div>
             <div className="mt-10 flex flex-col items-center justify-center">

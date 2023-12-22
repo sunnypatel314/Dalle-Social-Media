@@ -26,6 +26,7 @@ const FormField = ({
              text-black hover:cursor-pointer hover:bg-gray-300 "
             type="button"
             onClick={handleSurpriseMe}
+            disabled={isDisabled}
           >
             Surprise Me
           </button>

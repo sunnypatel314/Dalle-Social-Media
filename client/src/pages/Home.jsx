@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import Card from "../components/Card";
 import FormField from "../components/FormField";
 import Loader from "../components/Loader";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { logo } from "../assets";
-import { useNavigate } from "react-router-dom";
+import { FaPlus } from "react-icons/fa";
 
 const RenderCards = ({ data, user }) => {
   if (data?.length > 0) {
@@ -20,6 +20,8 @@ const Home = () => {
   const [searchText, setSearchText] = useState("");
   const [user, setUser] = useState("");
   const [myPostsOnlyCheckbox, setMyPostsOnlyCheckbox] = useState(false);
+
+  let windowWidth = window.innerWidth;
 
   const navigate = useNavigate();
 
@@ -45,31 +47,32 @@ const Home = () => {
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        const response = await fetch("http://localhost:8080/api/v1/post", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        if (response.ok) {
-          const result = await response.json();
-          if (myPostsOnlyCheckbox) {
-            setAllPosts(
-              result.data.reverse().filter((post) => post.name == user)
-            );
-            setStartingList(
-              result.data.reverse().filter((post) => post.name == user)
-            );
-          } else {
-            setAllPosts(result.data.reverse());
-            setStartingList(result.data.reverse());
-          }
+        if (localStorage.getItem("token")) {
+          const response = await fetch("http://localhost:8080/api/v1/post", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          if (response.ok) {
+            const result = await response.json();
+            if (myPostsOnlyCheckbox) {
+              setAllPosts(
+                result.data.reverse().filter((post) => post.name == user)
+              );
+              setStartingList(
+                result.data.reverse().filter((post) => post.name == user)
+              );
+            } else {
+              setAllPosts(result.data.reverse());
+              setStartingList(result.data.reverse());
+            }
 
-          setUser(result.user);
+            setUser(result.user);
+          }
         }
       } catch (error) {
-        //localStorage.removeItem("token");
         console.log(error.message);
         alert(error);
       } finally {
@@ -93,17 +96,18 @@ const Home = () => {
           <div className="flex flex-row justify-between space-x-3">
             <Link
               to={"/create-post"}
-              className="font-inter font-semibold bg-green-500 text-white py-2 
-          px-4 rounded-md hover:cursor-pointer hover:bg-green-700"
+              className="font-inter flex items-center font-semibold bg-green-500 text-white py-2 
+          px-2 rounded-md hover:cursor-pointer hover:bg-green-700"
             >
-              Create Post
+              <span className="mr-1">Create</span>
+              <FaPlus />
             </Link>
             <button
               onClick={logOut}
-              className="font-inter font-semibold bg-blue-500 text-white py-2 
-        px-4 rounded-md hover:cursor-pointer hover:bg-blue-700"
+              className="font-inter flex items-center font-semibold bg-red-500 text-white py-2 
+             px-2 rounded-md hover:cursor-pointer hover:bg-red-700"
             >
-              Log Out
+              <span className="mr-1">Log Out</span>
             </button>
           </div>
         ) : (
@@ -129,7 +133,7 @@ const Home = () => {
         <section className="w-full mx-auto">
           <div>
             <h1 className="font-extrabold text-[#222328] text-center text-[32px]">
-              Welcome {user}, to the Community Showcase
+              Welcome {user && `${user},`} to the Community Showcase
             </h1>
             <p className="mt-2 text-[#666e75] text-[14px] text-center">
               Browse through a collection of imaginative and visually stunning
@@ -137,29 +141,38 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="mt-10 flex flex-row items-center justify-center w-full">
-            <div className="w-3/4">
-              <div className="w-2/3 ml-auto">
-                <FormField
-                  labelName=""
-                  type="text"
-                  name="text"
-                  placeholder="Search posts or creators..."
-                  value={searchText}
-                  handleChange={handleSearchChange}
-                />
-              </div>
-            </div>
-            <div className="w-1/4 flex flex-row items-center justify-center space-x-4">
-              <h3 className="font-semibold text-[14px]">My Posts Only</h3>
-              <input
-                className="w-6 h-6 hover:cursor-pointer"
-                type="checkbox"
-                checked={myPostsOnlyCheckbox}
-                onChange={() => {
-                  setMyPostsOnlyCheckbox(!myPostsOnlyCheckbox);
-                }}
+          <div className="mt-10 mx-auto flex flex-row items-center justify-center w-full">
+            <div className="w-1/4"></div>
+            <div className="w-2/5 mx-auto">
+              <FormField
+                labelName=""
+                type="text"
+                name="text"
+                placeholder="Search posts or creators..."
+                value={searchText}
+                handleChange={handleSearchChange}
               />
+            </div>
+
+            <div className="w-1/4 flex flex-row items-center justify-center space-x-1">
+              <div className="w-1/5"></div>
+              <h3
+                className={`font-semibold ${
+                  windowWidth > 500 ? "text-[13px]" : "text-[7px]"
+                } `}
+              >
+                {user ? "My Posts Only" : ""}
+              </h3>
+              {user && (
+                <input
+                  className="w-6 h-6 hover:cursor-pointer"
+                  type="checkbox"
+                  checked={myPostsOnlyCheckbox}
+                  onChange={() => {
+                    setMyPostsOnlyCheckbox(!myPostsOnlyCheckbox);
+                  }}
+                />
+              )}
             </div>
           </div>
 
@@ -170,7 +183,7 @@ const Home = () => {
               </div>
             ) : (
               <>
-                {searchText && (
+                {searchText && user && (
                   <h2 className="font-medium text-center text-gray-600 text-xl mb-3">
                     Showing Resuls for{" "}
                     <span className="text-[#222328] font-semibold">
